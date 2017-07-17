@@ -1,0 +1,19 @@
+---
+- name: Update localhost's $home/.ssh/known_hosts & /etc/hosts
+  hosts: all
+  connection: local
+  gather_facts: no
+
+  tasks:
+  - name: "Build /etc/hosts file"
+    remote_user: automation
+    become: yes
+    become_method: sudo
+    lineinfile:   dest=/etc/hosts
+                  regex='.*{{ item }}$'
+                  line="{{ hostvars[item]['ansible_host'] }} {{item}}"
+                  state=present
+    when: hostvars[item]['ansible_host'] is defined
+    with_items: "{{groups['all']}}"
+
+
